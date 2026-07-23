@@ -12,7 +12,7 @@ import {
 import { colors } from '@src/core/constance/colors';
 import Navigation from '@src/core/navigation/Navigation';
 import { navigationRef } from '@src/core/navigation/router';
-import { TaskProvider } from '@src/core/provider/TaskProvider';
+import AppProvider from '@src/core/provider/AppProvider';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -20,9 +20,9 @@ function App() {
   return (
     <SafeAreaProvider>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} backgroundColor={colors.white} />
-      <TaskProvider>
+      <AppProvider>
         <Navigation  ref={navigationRef}/>
-      </TaskProvider>
+      </AppProvider>
     </SafeAreaProvider>
   );
 }

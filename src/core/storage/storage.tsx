@@ -7,6 +7,21 @@ export type StorageKey =
   |'user_token' 
   |'user'
   
+
+
+export const Storage = {
+  getItem: async (key: string) => {
+    return s.getString(key) ?? null;
+  },
+
+  setItem: async (key: string, value: string) => {
+    s.set(key, value);
+  },
+
+  removeItem: async (key: string) => {
+    s.remove(key);
+  },
+};
 export default class storage {
   static getItem (key:StorageKey ) {
     try {

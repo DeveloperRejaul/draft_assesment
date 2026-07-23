@@ -1,150 +1,159 @@
-import React, { useState } from 'react'
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
-import { useNavigation } from '@react-navigation/native'
-import { type NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { colors } from '@src/core/constance/colors'
-import { typography } from '@src/core/constance/typography'
-import type { RootStackParamsList } from '@src/core/navigation/types'
-import { useTaskContext } from '@src/core/provider/TaskProvider'
+import React, { useState } from 'react';
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { type NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { colors } from '@src/core/constance/colors';
+import { typography } from '@src/core/constance/typography';
+import { type RootStackParamsList } from '@src/core/navigation/types';
+import { useTaskStore } from '@src/core/store/taskStore';
 
-type CategoriesNavigationProp = NativeStackNavigationProp<RootStackParamsList, 'Categories'>
+type CategoryNavigationProp = NativeStackNavigationProp<RootStackParamsList>;
 
-export default function CategoriesScreen() {
-  const navigation = useNavigation<CategoriesNavigationProp>()
-  const { categories, addCategory, deleteCategory } = useTaskContext()
-  const [name, setName] = useState('')
+export default function CategoryScreen() {
+  const navigation = useNavigation<CategoryNavigationProp>();
+  const categories = useTaskStore((state) => state.categories);
+  const addCategory = useTaskStore((state) => state.addCategory);
+  const deleteCategory = useTaskStore((state) => state.deleteCategory);
+  const [name, setName] = useState('');
 
-  const submitCategory = () => {
-    const trimmed = name.trim()
-    if (!trimmed) {
-      return
-    }
-
-    addCategory(trimmed)
-    setName('')
-  }
+  const handleAddCategory = () => {
+    addCategory(name);
+    setName('');
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-      <View style={styles.headerRow}>
-        <View>
-          <Text style={[typography.title_sm_bold, styles.title]}>Categories</Text>
-          <Text style={[typography.text_sm_regular, styles.subtitle]}>Add or manage the categories used to organize tasks.</Text>
-        </View>
-        <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Text style={[typography.text_sm_bold, styles.backButtonText]}>Close</Text>
-        </Pressable>
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <Text style={styles.backButtonText}>← Back</Text>
+      </TouchableOpacity>
+
+      <View style={styles.heroCard}>
+        <Text style={[typography.text_sm_semibold, styles.eyebrow]}>Categories</Text>
+        <Text style={[typography.title_sm_bold, styles.title]}>Organize your tasks</Text>
+        <Text style={[typography.text_md_regular, styles.subtitle]}>Create categories and keep every task grouped in one place.</Text>
       </View>
 
-      <View style={styles.addRow}>
+      <View style={styles.card}>
+        <Text style={[typography.text_lg_semibold, styles.cardTitle]}>Add a category</Text>
         <TextInput
           value={name}
           onChangeText={setName}
-          placeholder="New category"
+          placeholder="Category name"
           style={styles.input}
           placeholderTextColor={colors.slate400}
         />
-        <Pressable style={styles.addButton} onPress={submitCategory}>
-          <Text style={[typography.text_md_bold, styles.addButtonText]}>Add</Text>
-        </Pressable>
+        <TouchableOpacity onPress={handleAddCategory} style={styles.primaryAction}>
+          <Text style={styles.primaryActionText}>Create category</Text>
+        </TouchableOpacity>
       </View>
 
-      {categories.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Text style={[typography.text_md_regular, styles.emptyText]}>No categories yet.</Text>
-        </View>
-      ) : (
-        categories.map((category) => (
-          <View key={category.id} style={styles.categoryRow}>
-            <Text style={[typography.text_md_medium, styles.categoryName]}>{category.name}</Text>
-            <Pressable style={styles.deleteButton} onPress={() => deleteCategory(category.id)}>
-              <Text style={[typography.text_sm_bold, styles.deleteButtonText]}>Delete</Text>
-            </Pressable>
-          </View>
-        ))
-      )}
+      <View style={styles.card}>
+        <Text style={[typography.text_lg_semibold, styles.cardTitle]}>Categories</Text>
+        {categories.length === 0 ? (
+          <Text style={[typography.text_md_regular, styles.emptyText]}>No categories yet. Create one to get started.</Text>
+        ) : (
+          categories.map((category) => (
+            <View key={category.id} style={styles.categoryItem}>
+              <Text style={[typography.text_md_semibold, styles.categoryName]}>{category.name}</Text>
+              <TouchableOpacity onPress={() => deleteCategory(category.id)} style={styles.deleteButton}>
+                <Text style={styles.deleteButtonText}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+          ))
+        )}
+      </View>
     </ScrollView>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 24,
-    paddingBottom: 40,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  title: {
-    color: colors.slate900,
-  },
-  subtitle: {
-    marginTop: 6,
-    color: colors.slate600,
+    flexGrow: 1,
+    padding: 20,
+    paddingBottom: 36,
+    backgroundColor: colors.brandPink50,
   },
   backButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 14,
+    alignSelf: 'flex-start',
+    paddingVertical: 8,
+    marginBottom: 12,
   },
   backButtonText: {
     color: colors.brandPink700,
+    fontSize: 16,
+    fontWeight: '600',
   },
-  addRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 20,
+  heroCard: {
+    backgroundColor: colors.white,
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 16,
+  },
+  eyebrow: {
+    color: colors.brandPink600,
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    marginBottom: 6,
+  },
+  title: {
+    color: colors.slate900,
+    marginBottom: 8,
+  },
+  subtitle: {
+    color: colors.slate600,
+    lineHeight: 24,
+  },
+  card: {
+    backgroundColor: colors.white,
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 16,
+  },
+  cardTitle: {
+    color: colors.slate800,
+    marginBottom: 12,
   },
   input: {
-    flex: 1,
-    backgroundColor: colors.slate50,
-    borderRadius: 18,
-    paddingHorizontal: 18,
-    paddingVertical: 14,
-    color: colors.slate900,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 12,
+    color: colors.slate800,
   },
-  addButton: {
-    paddingVertical: 16,
-    paddingHorizontal: 18,
+  primaryAction: {
     backgroundColor: colors.brandPink500,
-    borderRadius: 18,
-    justifyContent: 'center',
-  },
-  addButtonText: {
-    color: colors.white,
-  },
-  emptyState: {
-    paddingTop: 24,
+    paddingVertical: 12,
     alignItems: 'center',
+    borderRadius: 999,
+  },
+  primaryActionText: {
+    color: colors.white,
+    fontWeight: '600',
   },
   emptyText: {
-    color: colors.slate600,
+    color: colors.slate500,
   },
-  categoryRow: {
+  categoryItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: colors.white,
-    borderRadius: 18,
-    paddingVertical: 18,
-    paddingHorizontal: 18,
-    marginBottom: 12,
-    shadowColor: colors.black,
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 3,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: colors.slate200,
   },
   categoryName: {
-    color: colors.slate900,
+    color: colors.slate800,
   },
   deleteButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: colors.red50,
   },
   deleteButtonText: {
     color: colors.red600,
+    fontWeight: '600',
   },
-})
+});

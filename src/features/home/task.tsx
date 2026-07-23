@@ -7,6 +7,7 @@ import { GStyles } from '@src/core/constance/styles';
 import { typography } from '@src/core/constance/typography';
 import { type RootStackParamsList } from '@src/core/navigation/types';
 import { useTaskStore } from '@src/core/store/taskStore';
+import { supabase } from '@src/core/utils/supabase';
 
 type HomeNavigationProp = NativeStackNavigationProp<RootStackParamsList>;
 
@@ -19,16 +20,18 @@ export default function TaskScreen() {
   const toggleTaskStatus = useTaskStore((state) => state.toggleTaskStatus);
   const toggleTaskStarred = useTaskStore((state) => state.toggleTaskStarred);
 
+  
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'open' | 'done'>('all');
   const [sortMode, setSortMode] = useState<'dueDate' | 'createdAt'>('dueDate');
-
+  
   useEffect(() => {
     if (categories.length === 0) {
       addCategory('Work');
       addCategory('Personal');
     }
-
+   
+    
     if (tasks.length === 0 && categories.length === 0) {
       const workCategory = useTaskStore.getState().categories.find((item) => item.name === 'Work');
       const personalCategory = useTaskStore.getState().categories.find((item) => item.name === 'Personal');
@@ -55,6 +58,15 @@ export default function TaskScreen() {
     }
   }, [addCategory, addTask, categories.length, tasks.length]);
 
+  useEffect(() =>  {
+    (async() => {
+      const task = await supabase
+        .from('categories')
+        .select()
+      console.log(task);
+        
+    })()
+  }, [])
   const filteredTasks = useMemo(() => {
     const filtered = tasks.filter((task) => {
       const categoryMatch = selectedCategory === 'all' || task.categoryId === selectedCategory;

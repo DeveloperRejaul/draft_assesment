@@ -73,3 +73,23 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+
+# Large media files
+android/.gradle
+android/.kotlin
+android/build
+ios/Pods
+ios/build
+android/app/build
+vendor/bundle/ruby/3.2.0
+android/app/.cxx
+android/app/release
+android/.kotlin
+android/build
+ios/Pods
+ios/build
+android/app/build
+vendor/bundle/ruby/3.2.0
+android/app/.cxx
+android/app/release

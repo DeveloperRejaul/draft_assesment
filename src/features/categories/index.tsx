@@ -1,29 +1,49 @@
-import React, { useState } from 'react';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import React, { useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { type NativeStackNavigationProp } from '@react-navigation/native-stack';
+import {createForm} from 'zustic/hook-form'
 import { colors } from '@src/core/constance/colors';
+import { GStyles } from '@src/core/constance/styles';
 import { typography } from '@src/core/constance/typography';
-import { type RootStackParamsList } from '@src/core/navigation/types';
+import { router } from '@src/core/navigation/router';
 import { useTaskStore } from '@src/core/store/taskStore';
 
-type CategoryNavigationProp = NativeStackNavigationProp<RootStackParamsList>;
+const useForm  = createForm({
+  defaultValues :{
+    category:{
+      value:""
+    }
+  }
+});
+
 
 export default function CategoryScreen() {
-  const navigation = useNavigation<CategoryNavigationProp>();
+  const { Controller, getValues, handleSubmit, setValue, reset} = useForm();
   const categories = useTaskStore((state) => state.categories);
   const addCategory = useTaskStore((state) => state.addCategory);
   const deleteCategory = useTaskStore((state) => state.deleteCategory);
-  const [name, setName] = useState('');
+  const renameCategory = useTaskStore((state) => state.renameCategory);
+  
+  const [isEditing, setIsEditing] = useState(false);
+  const editRef = useRef<{ id: string} | null>(null);
 
-  const handleAddCategory = () => {
-    addCategory(name);
-    setName('');
+  const handleAddCategory = (data: ReturnType<typeof getValues>) => {
+    if(typeof data === 'string')  return
+
+    if(isEditing && editRef.current) {
+      renameCategory(editRef.current.id, data.category);
+      setIsEditing(false);
+      editRef.current = null;
+    } else {
+      addCategory(data.category);
+    }
+    reset()
   };
+
 
   return (
     <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backButtonText}>← Back</Text>
       </TouchableOpacity>
 
@@ -35,29 +55,45 @@ export default function CategoryScreen() {
 
       <View style={styles.card}>
         <Text style={[typography.text_lg_semibold, styles.cardTitle]}>Add a category</Text>
-        <TextInput
-          value={name}
-          onChangeText={setName}
-          placeholder="Category name"
-          style={styles.input}
-          placeholderTextColor={colors.slate400}
+        <Controller 
+          field='category'   
+          render={({value, onChange}) => {
+            return (
+              <TextInput
+                value={value}
+                onChangeText={(v) => onChange(v)}
+                placeholder="Category name"
+                style={styles.input}
+                placeholderTextColor={colors.slate400}
+              />
+            )}}
         />
-        <TouchableOpacity onPress={handleAddCategory} style={styles.primaryAction}>
-          <Text style={styles.primaryActionText}>Create category</Text>
+        <TouchableOpacity onPress={handleSubmit(handleAddCategory)} style={styles.primaryAction}>
+          <Text style={styles.primaryActionText}>{isEditing ? 'Rename category' : 'Create category'}</Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.card}>
         <Text style={[typography.text_lg_semibold, styles.cardTitle]}>Categories</Text>
-        {categories.length === 0 ? (
-          <Text style={[typography.text_md_regular, styles.emptyText]}>No categories yet. Create one to get started.</Text>
-        ) : (
+        {categories.length === 0 ? <Text style={[typography.text_md_regular, styles.emptyText]}>No categories yet. Create one to get started.</Text>: (
           categories.map((category) => (
             <View key={category.id} style={styles.categoryItem}>
               <Text style={[typography.text_md_semibold, styles.categoryName]}>{category.name}</Text>
-              <TouchableOpacity onPress={() => deleteCategory(category.id)} style={styles.deleteButton}>
-                <Text style={styles.deleteButtonText}>Delete</Text>
-              </TouchableOpacity>
+              <View style={GStyles.row}>
+                <TouchableOpacity 
+                  onPress={() => {
+                    editRef.current = { id: category.id};
+                    setValue('category', category.name);
+                    setIsEditing(true);
+                  }} 
+                  style={styles.renameButton}
+                >
+                  <Text style={styles.renameButtonText}>Rename</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => deleteCategory(category.id)} style={styles.deleteButton}>
+                  <Text style={styles.deleteButtonText}>Delete</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           ))
         )}
@@ -152,8 +188,18 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     backgroundColor: colors.red50,
   },
+  renameButton: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: colors.blue50,
+  },
   deleteButtonText: {
     color: colors.red600,
+    fontWeight: '600',
+  },
+  renameButtonText: {
+    color: colors.blue600,
     fontWeight: '600',
   },
 });

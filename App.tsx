@@ -9,6 +9,7 @@ import { StatusBar, useColorScheme } from 'react-native';
 import {
   SafeAreaProvider,
 } from 'react-native-safe-area-context';
+import { BottomSheetContainer } from '@src/core/components/BottomSheet';
 import { colors } from '@src/core/constance/colors';
 import Navigation from '@src/core/navigation/Navigation';
 import { navigationRef } from '@src/core/navigation/router';
@@ -23,6 +24,7 @@ function App() {
       <AppProvider>
         <Navigation  ref={navigationRef}/>
       </AppProvider>
+      <BottomSheetContainer/>
     </SafeAreaProvider>
   );
 }

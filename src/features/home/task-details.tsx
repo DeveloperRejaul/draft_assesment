@@ -1,42 +1,24 @@
 import React, { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { type RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { type NativeStackNavigationProp } from '@react-navigation/native-stack';
+import {  useRoute } from '@react-navigation/native';
+import MetaItem from '@src/core/components/meta-item';
 import { colors } from '@src/core/constance/colors';
+import { GStyles } from '@src/core/constance/styles';
 import { typography } from '@src/core/constance/typography';
-import { type RootStackParamsList } from '@src/core/navigation/types';
+import { router } from '@src/core/navigation/router';
 import { useTaskStore } from '@src/core/store/taskStore';
+import { type TaskDetailRouteProp } from './types';
 
-type TaskDetailRouteProp = RouteProp<RootStackParamsList, 'TaskDetail'>;
-type TaskDetailNavigationProp = NativeStackNavigationProp<RootStackParamsList>;
 
 export default function TaskDetailsScreen() {
-  const route = useRoute<TaskDetailRouteProp>();
-  const navigation = useNavigation<TaskDetailNavigationProp>();
-  const task = useTaskStore((state) => state.getTaskById(route.params.taskId));
-  const categories = useTaskStore((state) => state.categories);
-  const updateTask = useTaskStore((state) => state.updateTask);
-  const toggleTaskStatus = useTaskStore((state) => state.toggleTaskStatus);
-  const toggleTaskStarred = useTaskStore((state) => state.toggleTaskStarred);
-  const deleteTask = useTaskStore((state) => state.deleteTask);
-
+  const route = useRoute<TaskDetailRouteProp>()
+  const {getTaskById,updateTask,toggleTaskStatus,toggleTaskStarred,deleteTask,categories} = useTaskStore()
+  const task = getTaskById(route.params.taskId);
   const [title, setTitle] = useState(task?.title ?? '');
   const [description, setDescription] = useState(task?.description ?? '');
-  const [dueDate, setDueDate] = useState(task?.dueDate ?? '');
   const [categoryId, setCategoryId] = useState(task?.categoryId ?? '');
 
   const categoryName = useMemo(() => categories.find((item) => item.id === task?.categoryId)?.name ?? 'Uncategorized', [categories, task?.categoryId]);
-
-  if (!task) {
-    return (
-      <View style={styles.emptyState}>
-        <Text style={[typography.title_sm_bold, styles.emptyTitle]}>Task not found</Text>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Text style={styles.backButtonText}>Go back</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
 
   const handleSave = () => {
     if (!task) return;
@@ -44,27 +26,38 @@ export default function TaskDetailsScreen() {
       title,
       description,
       categoryId,
-      dueDate,
     });
   };
 
   const handleDelete = () => {
     if (!task) return;
     deleteTask(task.id);
-    navigation.goBack();
+    router.back();
   };
+
+
+  if (!task) {
+    return (
+      <View style={styles.emptyState}>
+        <Text style={[typography.title_sm_bold, styles.emptyTitle]}>Task not found</Text>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <Text style={styles.backButtonText}>Go back</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-        <Text style={styles.backButtonText}>← Back</Text>
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <Text style={styles.backButtonText}>Back</Text>
       </TouchableOpacity>
 
       <View style={styles.heroCard}>
-        <View style={styles.rowBetween}>
+        <View style={GStyles.rowBetween}>
           <Text style={[typography.text_sm_semibold, styles.eyebrow]}>Task details</Text>
           <TouchableOpacity onPress={() => toggleTaskStarred(task.id)} style={styles.starButton}>
-            <Text style={styles.starIcon}>{task.starred ? '★' : '☆'}</Text>
+            <Text style={styles.starIcon}>{task.starred ? 'star' : 'unstar'}</Text>
           </TouchableOpacity>
         </View>
         <Text style={[typography.title_sm_bold, styles.title]}>{task.title}</Text>
@@ -73,10 +66,23 @@ export default function TaskDetailsScreen() {
 
       <View style={styles.card}>
         <Text style={[typography.text_lg_semibold, styles.cardTitle]}>Edit task</Text>
-        <TextInput value={title} onChangeText={setTitle} placeholder="Task title" style={styles.input} placeholderTextColor={colors.slate400} />
-        <TextInput value={description} onChangeText={setDescription} placeholder="Task description" style={[styles.input, styles.textArea]} multiline placeholderTextColor={colors.slate400} />
-        <TextInput value={dueDate} onChangeText={setDueDate} placeholder="Due date" style={styles.input} placeholderTextColor={colors.slate400} />
-
+        <TextInput 
+          value={title} 
+          onChangeText={setTitle} 
+          placeholder="Task title" 
+          style={styles.input} 
+          placeholderTextColor={colors.slate400} 
+        />
+        <TextInput 
+          value={description} 
+          onChangeText={setDescription} 
+          placeholder="Task description" 
+          style={[styles.input, styles.textArea]}
+          multiline
+          placeholderTextColor={colors.slate400} 
+        />
+        
+        <Text>Due date: {task?.dueDate }</Text>
         <Text style={[typography.text_sm_medium, styles.label]}>Category</Text>
         <View style={styles.categoryList}>
           {categories.map((item) => (
@@ -109,15 +115,6 @@ export default function TaskDetailsScreen() {
         </View>
       </View>
     </ScrollView>
-  );
-}
-
-function MetaItem({ label, value }: { label: string; value: string }) {
-  return (
-    <View style={styles.metaItem}>
-      <Text style={[typography.text_sm_medium, styles.metaLabel]}>{label}</Text>
-      <Text style={[typography.text_md_semibold, styles.metaValue]}>{value}</Text>
-    </View>
   );
 }
 
@@ -174,20 +171,17 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 16,
   },
-  rowBetween: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
   cardTitle: {
     color: colors.slate800,
   },
   starButton: {
     padding: 4,
+    backgroundColor: colors.blue500,
+    borderRadius: 3
   },
   starIcon: {
-    fontSize: 24,
-    color: colors.yellow500,
+    fontSize: 12,
+    color: colors.white,
   },
   input: {
     borderWidth: 1,
@@ -232,19 +226,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 12,
-  },
-  metaItem: {
-    minWidth: '45%',
-    backgroundColor: colors.slate50,
-    borderRadius: 14,
-    padding: 12,
-  },
-  metaLabel: {
-    color: colors.slate500,
-    marginBottom: 4,
-  },
-  metaValue: {
-    color: colors.slate800,
   },
   actionsRow: {
     marginTop: 12,

@@ -5,7 +5,10 @@ export const persist = <T extends object>(key:StorageKey): Middleware<T> => (_se
   next(partial);
   try {
     const state = get() as any;
-    storage.setItem(key, JSON.stringify(state?.data || []));
+    
+    if(state.isInitializeing) return;
+    
+    storage.setItem(key, JSON.stringify({tasks: state.tasks || [], categories: state.categories || []}));
   } catch (error) {
     console.error('Failed to persist:', error);
   }

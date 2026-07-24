@@ -1,0 +1,61 @@
+
+  // const addTask = useTaskStore((state) => state.addTask);
+  
+  // const categories = useTaskStore((state) => state.categories);
+  // const addCategory = useTaskStore((state) => state.addCategory);
+  
+  // const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  // const [selectedStatus, setSelectedStatus] = useState<'all' | 'open' | 'done'>('all');
+  // const [sortMode, setSortMode] = useState<'dueDate' | 'createdAt'>('dueDate');
+  
+  // useEffect(() => {
+  //   if (categories.length === 0) {
+  //     addCategory('Work');
+  //     addCategory('Personal');
+  //   }
+   
+    
+  //   if (tasks.length === 0 && categories.length === 0) {
+  //     const workCategory = useTaskStore.getState().categories.find((item) => item.name === 'Work');
+  //     const personalCategory = useTaskStore.getState().categories.find((item) => item.name === 'Personal');
+
+  //     if (workCategory) {
+  //       
+  //     }
+
+  //     if (personalCategory) {
+  //       addTask({
+  //         title: 'Plan weekend',
+  //         description: 'Prepare an easy and restful schedule',
+  //         categoryId: personalCategory.id,
+  //         status: 'done',
+  //         dueDate: '2026-07-24',
+  //       });
+  //     }
+  //   }
+  // }, [addCategory, addTask, categories.length, tasks.length]);
+
+  // useEffect(() =>  {
+  //   (async() => {
+  //     const task = await supabase
+  //       .from('categories')
+  //       .select()
+  //     console.log(task);
+        
+  //   })()
+  // }, [])
+
+
+  // const filteredTasks = useMemo(() => {
+  //   const filtered = tasks.filter((task) => {
+  //     const categoryMatch = selectedCategory === 'all' || task.categoryId === selectedCategory;
+  //     const statusMatch = selectedStatus === 'all' || task.status === selectedStatus;
+  //     return categoryMatch && statusMatch;
+  //   });
+
+  //   return [...filtered].sort((a, b) => {
+  //     const valueA = a[sortMode];
+  //     const valueB = b[sortMode];
+  //     return valueA.localeCompare(valueB);
+  //   });
+  // }, [selectedCategory, selectedStatus, sortMode, tasks]);

@@ -2,10 +2,7 @@ import { createMMKV } from 'react-native-mmkv'
 
 export const s = createMMKV()
 
-export type StorageKey = 
-  "language" 
-  |'user_token' 
-  |'user'
+export type StorageKey = 'app_store'
   
 
 
